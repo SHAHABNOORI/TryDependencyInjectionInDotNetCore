@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WazeCredit.Data;
+using WazeCredit.Data.Repository;
 using WazeCredit.Models;
 using WazeCredit.Models.ViewModels;
 using WazeCredit.Service;
@@ -18,6 +19,7 @@ namespace WazeCredit.Controllers
         private readonly IMarketForecaster _marketForecaster;
         private readonly ICreditValidator _creditValidator;
         private readonly ILogger _logger;
+        private readonly IUnitOfWork _unitOfWork;
 
         //private readonly StripeSettings _stripeSettings;
         //private readonly SendGridSettings _sendGridSettings;
@@ -35,13 +37,18 @@ namespace WazeCredit.Controllers
             //IOptions<SendGridSettings> sendGridSettings,
             //IOptions<TwilioSettings> twilioSettings,
             IOptions<WazeForecastSettings> wazeForecastSettings,
-            ICreditValidator creditValidator, ApplicationDbContext db, ILogger<HomeController> logger)
+            ICreditValidator creditValidator, 
+            ApplicationDbContext db,
+            ILogger<HomeController> logger,
+            IUnitOfWork unitOfWork
+            )
         {
             HomeViewModel = new HomeViewModel();
             _marketForecaster = marketForecaster;
             _creditValidator = creditValidator;
             _db = db;
             _logger = logger;
+            _unitOfWork = unitOfWork;
             //_stripeSettings = stripeSettings.Value;
             //_sendGridSettings = sendGridSettings.Value;
             //_twilioSettings = twilioSettings.Value;
@@ -76,8 +83,11 @@ namespace WazeCredit.Controllers
                         creditService(CreditModel.Salary > 50000 ? CreditApproveType.High : CreditApproveType.Low)
                             .GetCreditApproved(CreditModel);
                     //add record to database
-                    await _db.CreditApplicationModel.AddAsync(CreditModel);
-                    await _db.SaveChangesAsync();
+                    //await _db.CreditApplicationModel.AddAsync(CreditModel);
+                    //await _db.SaveChangesAsync();
+                    _unitOfWork.CreditApplicationRepository.Add(CreditModel);
+                    _unitOfWork.Save();
+
                     creditResultViewModel.CreditId = CreditModel.Id;
                     creditResultViewModel.CreditApproved = CreditModel.CreditApproved;
                     return RedirectToAction(nameof(CreditResult), creditResultViewModel);

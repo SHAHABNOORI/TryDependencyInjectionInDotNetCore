@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using WazeCredit.Data.Repository;
 using WazeCredit.Models;
 using WazeCredit.Service;
 using WazeCredit.Service.LifeTimeExample;
@@ -57,6 +58,10 @@ namespace WazeCredit.Utility.DiConfig
             //services.TryAddTransient<IMarketForecaster, MarketForecaster>();
             //services.Replace(ServiceDescriptor.Transient<IMarketForecaster, MarketForecaster>());
             //services.RemoveAll<IMarketForecaster>();
+
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             return services;
         }
     }

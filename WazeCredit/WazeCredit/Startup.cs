@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -6,13 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using WazeCredit.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WazeCredit.Middleware;
-using WazeCredit.Models;
-using WazeCredit.Service;
-using WazeCredit.Service.LifeTimeExample;
 using WazeCredit.Utility.DiConfig;
 
 namespace WazeCredit
