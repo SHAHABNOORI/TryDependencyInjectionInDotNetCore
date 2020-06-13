@@ -1,8 +1,10 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model WazeCredit.Models.ViewModels.HomeViewModel
+@using Microsoft.Extensions.Options
+@inject IOptions<WazeCredit.Utility.AppSettingsClasses.WazeForecastSettings> WazeForecastSettings;
+@*@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;*@
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <p>@Model.MarketForecast</p>
+    <p>Current Market Prediction Status : @(WazeForecastSettings.Value.ForecastTrackerEnabled?"Online":"Offline")</p>
 </div>
