@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WazeCredit.Data;
 using WazeCredit.Models;
@@ -16,6 +17,7 @@ namespace WazeCredit.Controllers
     {
         private readonly IMarketForecaster _marketForecaster;
         private readonly ICreditValidator _creditValidator;
+        private readonly ILogger _logger;
 
         //private readonly StripeSettings _stripeSettings;
         //private readonly SendGridSettings _sendGridSettings;
@@ -33,12 +35,13 @@ namespace WazeCredit.Controllers
             //IOptions<SendGridSettings> sendGridSettings,
             //IOptions<TwilioSettings> twilioSettings,
             IOptions<WazeForecastSettings> wazeForecastSettings,
-            ICreditValidator creditValidator, ApplicationDbContext db)
+            ICreditValidator creditValidator, ApplicationDbContext db, ILogger<HomeController> logger)
         {
             HomeViewModel = new HomeViewModel();
             _marketForecaster = marketForecaster;
             _creditValidator = creditValidator;
             _db = db;
+            _logger = logger;
             //_stripeSettings = stripeSettings.Value;
             //_sendGridSettings = sendGridSettings.Value;
             //_twilioSettings = twilioSettings.Value;
@@ -55,7 +58,7 @@ namespace WazeCredit.Controllers
         [HttpPost]
         [ActionName(nameof(CreditApplication))]
         public async Task<IActionResult> CreditApplicationPost(
-            [FromServices] Func<CreditApproveType,ICreditApproved> creditService)
+            [FromServices] Func<CreditApproveType, ICreditApproved> creditService)
         {
             if (ModelState.IsValid)
             {
@@ -95,7 +98,7 @@ namespace WazeCredit.Controllers
 
         public IActionResult Index()
         {
-
+            _logger.LogInformation("Home Controller Index Action Called");
             //MarketForecasterV2 marketForecaster = new MarketForecasterV2();
             MarketResult currentMarketResult = _marketForecaster.GetMarketPrediction();
             switch (currentMarketResult.MarketCondition)
@@ -114,6 +117,7 @@ namespace WazeCredit.Controllers
                     break;
 
             }
+            _logger.LogInformation("Home Controller Index Action Ended");
             return View(HomeViewModel);
         }
 

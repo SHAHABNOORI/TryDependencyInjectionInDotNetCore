@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using WazeCredit.Middleware;
 using WazeCredit.Models;
 using WazeCredit.Service;
@@ -34,58 +35,13 @@ namespace WazeCredit
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddTransient<IMarketForecaster, MarketForecasterV2>();
-
-            //Only work on singleton
-            //services.AddSingleton<IMarketForecaster>(new MarketForecaster());
-
-            //services.Configure<WazeForecastSettings>(Configuration.GetSection("WazeForecast"));
-            //services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
-            //services.Configure<SendGridSettings>(Configuration.GetSection("SendGrid"));
-            //services.Configure<TwilioSettings>(Configuration.GetSection("Twilio"));
-
-            services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddAppSettingsConfig(Configuration);
-
-            //services.AddScoped<IValidationChecker, AddressValidationChecker>();
-            //services.AddScoped<IValidationChecker, CreditValidationChecker>();
-            //services.TryAddEnumerable(ServiceDescriptor.Scoped<IValidationChecker,AddressValidationChecker>());
-            //services.TryAddEnumerable(ServiceDescriptor.Scoped<IValidationChecker, CreditValidationChecker>());
-
-            services.TryAddEnumerable(new[]
-            {
-                ServiceDescriptor.Scoped<IValidationChecker,AddressValidationChecker>(),
-                ServiceDescriptor.Scoped<IValidationChecker, CreditValidationChecker>()
-            });
-
-            services.AddScoped<CreditApprovedHigh>();
-            services.AddScoped<CreditApprovedLow>();
-            
-
-            services.AddScoped<Func<CreditApproveType, ICreditApproved>>(sp => range =>
-            {
-                return range switch
-                {
-                    CreditApproveType.High => sp.GetService<CreditApprovedHigh>(),
-                    CreditApproveType.Low => sp.GetService<CreditApprovedLow>(),
-                    _ => sp.GetService<CreditApprovedLow>()
-                };
-            });
-
-            services.AddScoped<ICreditValidator, CreditValidator>();
-
-
-            services.AddTransient<TransientService>();
-            services.AddScoped<ScopedService>();
-            services.AddSingleton<SingletonService>();
-            //services.TryAddTransient<IMarketForecaster, MarketForecaster>();
-            //services.Replace(ServiceDescriptor.Transient<IMarketForecaster, MarketForecaster>());
-            //services.RemoveAll<IMarketForecaster>();
+            services.AddAllServices();
             services.AddRazorPages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -102,7 +58,7 @@ namespace WazeCredit
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            loggerFactory.AddFile("logs/creditApp-log-{Date}.txt");
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseMiddleware<CustomMiddleware>();
